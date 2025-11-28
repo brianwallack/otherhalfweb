@@ -11,7 +11,8 @@ export default async function handler(req, res) {
   }
 
   const apiKey = process.env.RESEND_API_KEY;
-  const notifyAddress = process.env.WAITLIST_NOTIFY_EMAIL || "support@otherhalfapp.com";
+  const notifyAddress =
+    process.env.WAITLIST_NOTIFY_EMAIL || "info@otherhalfapp.com";
 
   if (!apiKey) {
     return res
