@@ -13,6 +13,8 @@ export default async function handler(req, res) {
   const apiKey = process.env.RESEND_API_KEY;
   const notifyAddress =
     process.env.WAITLIST_NOTIFY_EMAIL || "info@otherhalfapp.com";
+  const fromAddress =
+    process.env.WAITLIST_FROM_EMAIL || "Otherhalf Waitlist <waitlist@resend.dev>";
 
   if (!apiKey) {
     return res
@@ -28,7 +30,7 @@ export default async function handler(req, res) {
         Authorization: `Bearer ${apiKey}`,
       },
       body: JSON.stringify({
-        from: "Otherhalf Waitlist <waitlist@otherhalfapp.com>",
+        from: fromAddress,
         to: notifyAddress,
         subject: "New Otherhalf waitlist signup",
         html: `<p>New subscriber: <strong>${email}</strong></p>`,
@@ -37,13 +39,21 @@ export default async function handler(req, res) {
 
     if (!response.ok) {
       const detail = await response.text();
-      throw new Error(detail || "Failed to notify waitlist inbox.");
+      throw new Error(
+        detail || "Failed to notify waitlist inbox. Verify sender domain."
+      );
     }
 
     return res.status(200).json({ success: true });
   } catch (error) {
-    console.error(error);
-    return res.status(500).json({ error: "Unable to submit waitlist entry." });
+    console.error("Waitlist submission failed:", error);
+    return res
+      .status(500)
+      .json({
+        error:
+          error.message ||
+          "Unable to submit waitlist entry. Please try again shortly.",
+      });
   }
 }
 
